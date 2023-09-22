@@ -14,8 +14,6 @@ Delete individual broken video files.
 
 Delete all broken video files at once.
 
-Skip the scanning of specific files.
-
 Rescan the directory to find newly broken files.
 
 ## Requirements
