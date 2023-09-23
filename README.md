@@ -2,6 +2,10 @@
 
 The Broken Video File Detector is a Python script that helps you identify and manage broken video files within a directory. It provides a user-friendly graphical interface for selecting a directory, scanning for broken video files, and performing various actions on them, such as deletion.
 
+
+***Be cautious when deleting files, as they cannot be recovered once deleted.***
+***Some video files may take longer to scan, depending on their size.***
+
 ## Features
 
 Easily browse and select a directory for scanning.
@@ -42,11 +46,6 @@ To delete all broken video files in one go, click the "Delete All" button.
 Click the "Scan" button to re-scan the current directory and find newly broken files.
 
 Click the "Cache" button to initiate the scanning process without cache.
-
-## Note
-
-***Be cautious when deleting files, as they cannot be recovered once deleted.***
-***Some video files may take longer to scan, depending on their size.***
 
 ## License
 
