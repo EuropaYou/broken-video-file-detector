@@ -75,7 +75,7 @@ SOFTWARE.
 
     The Broken Video File Detector uses the moviepy library for video file analysis.
 
-Contributing
+## Contributing
 
 Feel free to open an issue or create a pull request to contribute to this project.
 Questions or Issues
