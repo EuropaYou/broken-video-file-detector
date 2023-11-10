@@ -5,12 +5,16 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from moviepy.editor import VideoFileClip
 import joblib
+import asyncio
+import threading
+
 
 recursive_search = False
 cache_search = True
 current_directory = None
 cache_file = "broken_video_files_cache.pkl"
 
+task_queue = asyncio.Queue()
 
 def is_video_file(file_path):
     mime_type, _ = mimetypes.guess_type(file_path)
@@ -30,7 +34,7 @@ def is_video_file(file_path):
     return mime_type in video_mime_types
     
     
-def is_video_file_broken(file_path):
+async def is_video_file_broken(file_path):
     update_status_label(f"Scanning directory... Checking if video is broken: \n{os.path.basename(file_path).split('/')[-1]}")
     root.update_idletasks()
     try:
@@ -39,39 +43,34 @@ def is_video_file_broken(file_path):
         return False
     except Exception as e:
         return True
+        
+        
+async def background_task():
+    while True:
+        task = await task_queue.get()
+        await task
 
 
 def browse_directory():
+    asyncio.run_coroutine_threadsafe(scan_directory(), asyncio.get_event_loop())
+    
+    
+async def scan_directory():
     global current_directory
     directory_path = filedialog.askdirectory()
     if directory_path:
-        current_directory = directory_path
-        update_status_label("Scanning directory...")
-        broken_files = find_broken_video_files(directory_path, recursive_search, cache_search)
-        update_listbox(broken_files)
-        update_status_label("Scan complete.")
+        current_directory = directory_path    
 
 
 def toggle_recursive_search():
     global recursive_search
     recursive_search = not recursive_search
     recursive_button.config(text="Recursive: " + ("On" if recursive_search else "Off"))
-    if current_directory:
-        update_status_label("Scanning directory...")
-        broken_files = find_broken_video_files(current_directory, recursive_search, cache_search)
-        update_listbox(broken_files)
-        update_status_label("Scan complete.")
-        
 
 def toggle_cache_search():
     global cache_search
     cache_search = not cache_search
     cache_button.config(text="Cache: " + ("On" if cache_search else "Off"))
-    if current_directory:
-        update_status_label("Scanning directory...")
-        broken_files = find_broken_video_files(current_directory, recursive_search, cache_search)
-        update_listbox(broken_files)
-        update_status_label("Scan complete.")
 
 
 def find_broken_video_files(directory, recursive, cache_search):
@@ -164,10 +163,22 @@ def update_listbox(broken_files):
     listbox.delete(0, tk.END)
     if broken_files:
         for file in broken_files:
-            listbox.insert(tk.END, file)
+            listbox.insert(tk.END, file.replace(current_directory, ""))
     else:
         listbox.insert(tk.END, "No broken video files found in the selected directory.")
 
+
+
+def exit_program():
+    root.destroy()
+    loop.call_soon_threadsafe(loop.stop)
+    thread.join()
+          
+
+loop = asyncio.get_event_loop()
+thread = threading.Thread(target=loop.run_forever)
+thread.start()
+loop.create_task(background_task())
 
 root = tk.Tk()
 root.config(bg="#242424")
@@ -194,9 +205,16 @@ recursive_button.pack(side=tk.LEFT)
 cache_button = tk.Button(frame, text="Cache: On", command=toggle_cache_search, bg="#242424", fg="white")
 cache_button.pack(side=tk.LEFT)
 
-listbox = tk.Listbox(root, bg="#26242f", fg="white")
-listbox.pack(padx=1, pady=1, expand=True, fill=tk.BOTH)
+frame3 = tk.Frame(root)
+frame3.pack(fill=tk.BOTH, expand=1)
 
+listbox = tk.Listbox(frame3, bg="#26242f", fg="white")
+listbox.pack(padx=1, pady=1, expand=True, fill=tk.BOTH, side =tk.LEFT)
+
+yscrollbar = tk.Scrollbar(frame3, orient="vertical", command=listbox.yview)
+yscrollbar.pack(side=tk.RIGHT, fill="both")
+xscrollbar = tk.Scrollbar(root, orient="horizontal", command=listbox.xview)
+xscrollbar.pack(fill="both")
 
 frame1 = tk.Frame(root, bg="#242424")
 frame1.pack()
@@ -211,4 +229,5 @@ status_label = tk.Label(root, text="Idle", fg="blue", bg="#242424")
 status_label.pack()
 
 re_scan = False
+root.protocol("WM_DELETE_WINDOW", exit_program)
 root.mainloop()
