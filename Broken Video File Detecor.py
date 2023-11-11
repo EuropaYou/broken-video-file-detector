@@ -7,12 +7,14 @@ from moviepy.editor import VideoFileClip
 import joblib
 import asyncio
 import threading
+import logging
 
 
 recursive_search = False
 cache_search = True
 current_directory = None
 cache_file = "broken_video_files_cache.pkl"
+logging.basicConfig(filename='broken_video_detector.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 task_queue = asyncio.Queue()
 
@@ -26,6 +28,7 @@ DARK_MODE_FG = "#FFFFFF"
 def toggle_dark_light_mode():
     global dark_mode
     dark_mode = not dark_mode
+    logging.info(f"Toggled dark_light_button: {dark_mode}")
     bg_color = DARK_MODE_BG if dark_mode else LIGHT_MODE_BG
     fg_color = DARK_MODE_FG if dark_mode else LIGHT_MODE_FG
 
@@ -67,6 +70,7 @@ def is_video_file(file_path):
     
 async def is_video_file_broken(file_path):
     update_status_label(f"Scanning directory... Checking if video is broken: \n{os.path.basename(file_path).split('/')[-1]}")
+    logging.info(f"Scanning directory... Checking if video is broken: \n{os.path.basename(file_path).split('/')[-1]}")
     root.update_idletasks()
     try:
         video = VideoFileClip(file_path)
@@ -84,6 +88,7 @@ async def background_task():
 
 def browse_directory():
     asyncio.run_coroutine_threadsafe(scan_directory(), asyncio.get_event_loop())
+    logging.info("Browsing directory.")
     
     
 async def scan_directory():
@@ -91,24 +96,32 @@ async def scan_directory():
     directory_path = filedialog.askdirectory()
     if directory_path:
         current_directory = directory_path    
+        logging.info(f"Selected directory: {current_directory}")
 
 
 def toggle_recursive_search():
     global recursive_search
     recursive_search = not recursive_search
     recursive_button.config(text="Recursive: " + ("On" if recursive_search else "Off"))
+    logging.info("Toggled Recursive Search " + ("On" if recursive_search else "Off"))
 
 def toggle_cache_search():
     global cache_search
     cache_search = not cache_search
     cache_button.config(text="Cache: " + ("On" if cache_search else "Off"))
+    logging.info("Toggled Cache " + + ("On" if cache_search else "Off"))
 
 
 def find_broken_video_files(directory, recursive, cache_search):
-    if os.path.exists(cache_file) and cache_search:
-        cache = joblib.load(cache_file)
-        if cache['directory'] == directory and not re_scan:
-            return cache['broken_files']
+    logging.info(f"Finding broken video files in directory: {directory}")
+    
+    if os.path.exists(cache_file):
+        if cache_search:
+            cache = joblib.load(cache_file)
+            if cache['directory'] == directory and not re_scan:
+                return cache['broken_files']
+    else:
+        logging.error(f"Cache file doesn't exist! {cache_file}")
 
     broken_files = []
     if recursive:
@@ -127,53 +140,70 @@ def find_broken_video_files(directory, recursive, cache_search):
 
     cache = {'directory': directory, 'broken_files': broken_files}
     joblib.dump(cache, cache_file)
+    logging.info(f"Dumped broken video files in cache file: {cache_file}")
 
     return broken_files
 
 
 def delete_selected_file(arg):
     selected_index = listbox.curselection()
+    logging.info("User is trying to delete a file.")
     if selected_index:
         selected_index = int(selected_index[0])
         selected_file = listbox.get(selected_index)
 
         result = messagebox.askquestion("Confirm Deletion", f"Are you sure you want to delete '{selected_file}'?")
+        logging.info(f"A messagebox sent to user to confirm deletion of {selected_file}.")
         if result == "yes":
             try:
                 update_status_label(f"Deleting '{selected_file}'...")
+                logging.info(f"Deleting '{selected_file}'...")
                 os.remove(selected_file)
                 messagebox.showinfo("File Deleted", f"'{selected_file}' has been deleted.")
+                logging.info("File Deleted", f"'{selected_file}' has been deleted.")
                 listbox.delete(selected_index)
                 update_status_label("Deletion complete.")
+                logging.info("Deletion complete.")
             except Exception as e:
                 messagebox.showerror("Error", f"Unable to delete '{selected_file}': {e}")
+                logging.error("Error", f"Unable to delete '{selected_file}': {e}")
                 update_status_label("Deletion failed.")
         else:
             messagebox.showinfo("Deletion Canceled", f"Deletion of '{selected_file}' canceled.")
+            logging.info("Deletion Canceled", f"Deletion of '{selected_file}' canceled.")
     else:
         messagebox.showwarning("No File Selected", "Please select a file to delete.")
+        logging.warning("No File Selected", "Please select a file to delete.")
 
 
 def delete_all_files(arg):
     if listbox.size() == 0:
         messagebox.showwarning("No File Selected", f"There is no entries in result tab")
+        logging.warning("No File Selected", f"There is no entries in result tab")
         return
     
     result = messagebox.askquestion("Confirm Deletion", f"Are you sure you want to delete all files?")
+    logging.info(f"A messagebox sent to user to confirm deletion of all files.")
     if result == "yes":
         all_indices = listbox.get(0, tk.END)
         for index in all_indices:
                 try:
                     update_status_label(f"Deleting '{index}'...")
+                    logging.info(f"Deleting '{index}'...")
                     os.remove(index)
                     update_status_label(f"'{index}' has been deleted.")
                     update_status_label("Deletion complete.")
+                    logging.info("File Deleted", f"'{index}' has been deleted.")
+                    logging.info("Deletion complete.")
                 except Exception as e:
                     messagebox.showerror("Error", f"Unable to delete '{index}': {e}")
+                    logging.error("Error", f"Unable to delete '{index}': {e}")
                     update_status_label("Deletion failed.")
+                    logging.error("Deletion failed.")
         listbox.delete(0, tk.END)
     else:
         messagebox.showinfo("Deletion Canceled", f"Deletion of files canceled.")
+        logging.info("Deletion Canceled", f"Deletion of files canceled.")
     
     
 def rescan_directory():
@@ -181,9 +211,11 @@ def rescan_directory():
     re_scan = True
     if current_directory:
         update_status_label("Scanning directory...")
+        logging.info("Scanning directory...")
         broken_files = find_broken_video_files(current_directory, recursive_search, cache_search)
         update_listbox(broken_files)
         update_status_label("Scan complete.")
+        logging.info("Scan complete.")
 
 
 def update_status_label(text):
