@@ -16,6 +16,37 @@ cache_file = "broken_video_files_cache.pkl"
 
 task_queue = asyncio.Queue()
 
+dark_mode = True
+LIGHT_MODE_BG = "#FFFFFF"
+LIGHT_MODE_FG = "#000000"
+DARK_MODE_BG = "#242424"
+DARK_MODE_FG = "#FFFFFF"
+
+
+def toggle_dark_light_mode():
+    global dark_mode
+    dark_mode = not dark_mode
+    bg_color = DARK_MODE_BG if dark_mode else LIGHT_MODE_BG
+    fg_color = DARK_MODE_FG if dark_mode else LIGHT_MODE_FG
+
+    root.config(bg=bg_color)
+    label.config(bg=bg_color, fg=fg_color)
+    frame.config(bg=bg_color)
+    browse_button.config(bg=bg_color, fg=fg_color)
+    rescan_button.config(bg=bg_color, fg=fg_color)
+    recursive_button.config(bg=bg_color, fg=fg_color)
+    cache_button.config(bg=bg_color, fg=fg_color)
+    frame3.config(bg=bg_color)
+    listbox.config(bg=bg_color, fg=fg_color)
+    yscrollbar.config(bg=bg_color)
+    xscrollbar.config(bg=bg_color)
+    frame1.config(bg=bg_color)
+    delete_button.config(bg=bg_color, fg=fg_color)
+    delete_all_button.config(bg=bg_color, fg=fg_color)
+    status_label.config(bg=bg_color, fg="blue")
+    dark_light_button.config(bg=bg_color, fg=fg_color)
+
+    
 def is_video_file(file_path):
     mime_type, _ = mimetypes.guess_type(file_path)
     video_mime_types = [
@@ -227,6 +258,10 @@ delete_all_button.pack(side=tk.LEFT)
 
 status_label = tk.Label(root, text="Idle", fg="blue", bg="#242424")
 status_label.pack()
+
+dark_light_button = tk.Button(frame, text="Dark/Light Mode", command=toggle_dark_light_mode, bg="#242424", fg="white")
+dark_light_button.pack(side=tk.LEFT)
+
 
 re_scan = False
 root.protocol("WM_DELETE_WINDOW", exit_program)
