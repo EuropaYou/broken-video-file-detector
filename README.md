@@ -80,7 +80,7 @@ SOFTWARE.
 
 ## Acknowledgments
 
-    The Broken Video File Detector uses the moviepy library for video file analysis.
+    Broken Video File Detector uses the moviepy library for video file analysis.
 
 ## Contributing
 
