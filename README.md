@@ -1,5 +1,11 @@
 # Broken Video File Detector
 
+## I am rewriting the project.
+
+ By rewriting the project I will add a way to detect broken images too
+ 
+## About
+
 The Broken Video File Detector is a Python program that helps you identify and manage broken video files within a directory. It provides a user-friendly graphical interface for selecting a directory, scanning for broken video files, and performing various actions on them, such as deletion.
 
 
