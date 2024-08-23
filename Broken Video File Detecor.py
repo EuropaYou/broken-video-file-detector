@@ -26,7 +26,7 @@ LIGHT_MODE_BG = "#FFFFFF"
 LIGHT_MODE_FG = "#000000"
 DARK_MODE_BG = "#242424"
 DARK_MODE_FG = "#FFFFFF"
-BVFD_VERSION = "v0.3.0-beta"
+BVFD_VERSION = "v0.3.1-beta"
 
 
 def check_for_updates(current_version):
