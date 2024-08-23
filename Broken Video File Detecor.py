@@ -1,4 +1,3 @@
-import time
 import os
 import mimetypes
 import tkinter as tk
@@ -8,6 +7,8 @@ import joblib
 import asyncio
 import threading
 import logging
+import requests
+import sys
 
 
 recursive_search = False
@@ -15,6 +16,8 @@ cache_search = True
 current_directory = None
 cache_file = "broken_video_files_cache.pkl"
 logging.basicConfig(filename='broken_video_detector.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+print(sys.version)
+logging.info(sys.version)
 
 task_queue = asyncio.Queue()
 
@@ -23,7 +26,26 @@ LIGHT_MODE_BG = "#FFFFFF"
 LIGHT_MODE_FG = "#000000"
 DARK_MODE_BG = "#242424"
 DARK_MODE_FG = "#FFFFFF"
+BVFD_VERSION = "v0.3.0-beta"
 
+
+def check_for_updates(current_version):
+    repo_url = 'https://api.github.com/repos/EuropaYou/broken-video-file-detector/releases'
+    
+    try:
+        response = requests.get(repo_url)
+        data = response.json()
+        latest_version_name: str = data[0]['name']
+        latest_version_body: str = data[0]['body']
+        
+        if latest_version_name.lower() != current_version.lower():
+            print("There is newer version (%s) available. (Current version is: %s)\nRelease notes are:\n\n%s" % (latest_version_name, current_version, latest_version_body))
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"Error checking for updates: {e}")
+        return False
 
 def toggle_dark_light_mode():
     global dark_mode
@@ -114,12 +136,11 @@ def toggle_cache_search():
 
 def find_broken_video_files(directory, recursive, cache_search):
     logging.info(f"Finding broken video files in directory: {directory}")
-    
-    if os.path.exists(cache_file):
-        if cache_search:
-            cache = joblib.load(cache_file)
-            if cache['directory'] == directory and not re_scan:
-                return cache['broken_files']
+
+    if os.path.exists(cache_file) and cache_search:
+        cache = joblib.load(cache_file)
+        if cache['directory'] == directory and not re_scan:
+            return cache['broken_files']
     else:
         logging.error(f"Cache file doesn't exist! {cache_file}")
 
@@ -237,7 +258,7 @@ def exit_program():
     loop.call_soon_threadsafe(loop.stop)
     thread.join()
           
-
+check_for_updates(BVFD_VERSION)
 loop = asyncio.get_event_loop()
 thread = threading.Thread(target=loop.run_forever)
 thread.start()
