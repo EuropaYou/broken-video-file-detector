@@ -64,7 +64,7 @@ Click the "Cache" button to initiate the scanning process without cache.
 
 MIT License
 
-Copyright (c) 2023 EuropaYou
+Copyright (c) 2025 EuropaYou
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
