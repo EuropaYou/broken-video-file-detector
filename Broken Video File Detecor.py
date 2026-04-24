@@ -151,7 +151,7 @@ def toggle_cache_search():
     global cache_search
     cache_search = not cache_search
     cache_button.config(text="Cache: " + ("On" if cache_search else "Off"))
-    logging.info("Toggled Cache " + + ("On" if cache_search else "Off"))
+    logging.info("Toggled Cache " + ("On" if cache_search else "Off"))
 
 
 def find_broken_video_files(directory, recursive, cache_search):
