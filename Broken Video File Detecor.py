@@ -50,8 +50,9 @@ def check_for_updates(current_version):
         else:
             return False
     except Exception as e:
-        print(f"Error checking for updates: {e}")
+        print(f"An error occurred while checking for updates: {e}")
         return False
+
 
 def toggle_dark_light_mode():
     global dark_mode
@@ -120,8 +121,8 @@ async def background_task():
 
 
 def browse_directory():
-    asyncio.run_coroutine_threadsafe(scan_directory(), asyncio.get_event_loop())
     logging.info("Browsing directory.")
+    asyncio.run_coroutine_threadsafe(scan_directory(), asyncio.get_event_loop())
 
 
 async def scan_directory():
@@ -153,7 +154,7 @@ def find_broken_video_files(directory, recursive, cache_search):
         if cache['directory'] == directory and not re_scan:
             return cache['broken_files']
     else:
-        logging.error(f"Cache file doesn't exist! {cache_file}")
+        logging.warning(f"Cache file doesn't exist! {cache_file}")
 
     broken_files = []
     if recursive:
@@ -217,6 +218,7 @@ def delete_all_files(arg):
     result = messagebox.askquestion("Confirm Deletion", f"Are you sure you want to delete all files?")
     logging.info(f"A messagebox sent to user to confirm deletion of all files.")
     if result == "yes":
+        logging.info(f"User said yes. Deleting...")
         all_indices = listbox.get(0, tk.END)
         for index in all_indices:
                 try:
@@ -228,8 +230,8 @@ def delete_all_files(arg):
                     logging.info("File Deleted", f"'{index}' has been deleted.")
                     logging.info("Deletion complete.")
                 except Exception as e:
-                    messagebox.showerror("Error", f"Unable to delete '{index}': {e}")
-                    logging.error("Error", f"Unable to delete '{index}': {e}")
+                    messagebox.showerror("Error", f"Unable to delete file '{index}': {e}")
+                    logging.error("Error", f"Unable to delete file '{index}': {e}")
                     update_status_label("Deletion failed.")
                     logging.error("Deletion failed.")
         listbox.delete(0, tk.END)
@@ -261,7 +263,6 @@ def update_listbox(broken_files):
             listbox.insert(tk.END, file.replace(current_directory, ""))
     else:
         listbox.insert(tk.END, "No broken video files found in the selected directory.")
-
 
 
 def exit_program():
@@ -326,7 +327,6 @@ status_label.pack()
 
 dark_light_button = tk.Button(frame, text="Dark/Light Mode", command=toggle_dark_light_mode, bg="#1c72b0", fg="white")
 dark_light_button.pack(side=tk.LEFT, padx=10, pady=5)
-
 
 re_scan = False
 root.protocol("WM_DELETE_WINDOW", exit_program)
