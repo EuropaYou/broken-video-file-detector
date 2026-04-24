@@ -2,7 +2,7 @@ import os
 import mimetypes
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from moviepy.editor import VideoFileClip
+import moviepy
 import joblib
 import asyncio
 import threading
@@ -18,6 +18,14 @@ cache_file = "broken_video_files_cache.pkl"
 logging.basicConfig(filename='broken_video_detector.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 print(sys.version)
 logging.info(sys.version)
+
+if moviepy.__version__ < "2.0.0":
+    from moviepy.editor import VideoFileClip
+    print("\nPlease update your moviepy version:\n\tpip install -U moviepy\n")
+    logging.warning("Please update your moviepy version:\n\tpip install -U moviepy\n")
+
+else:
+    from moviepy import VideoFileClip
 
 task_queue = asyncio.Queue()
 
