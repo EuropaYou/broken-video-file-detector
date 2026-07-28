@@ -67,7 +67,7 @@ DARK_MODE_SCROLLBAR_BG = "#717171"
 LIGHT_MODE_FG = "black"
 DARK_MODE_FG = "#FFFFFF"
 BUTTON_BG = "#1c72b0"
-BVFD_VERSION = "v0.4.0-beta"
+BVFD_VERSION = "v0.5.0-beta"
 
 
 def check_for_updates(current_version):
