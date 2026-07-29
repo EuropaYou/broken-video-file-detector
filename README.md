@@ -1,8 +1,16 @@
 # Broken Video File Detector
 
-## I am rewriting the project.
+## Future of this project.
 
- By rewriting the project I will add a way to detect broken images too
+ I will add some "backends" that lets you, the user to select the backend.
+ 
+ Backends in plan currently are:
+  + FFmpeg
+  + OpenCV
+
+ I will also add a way to detect broken images too.
+
+ Revamp UI
  
 ## About
 
